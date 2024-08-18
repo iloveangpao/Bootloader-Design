@@ -6,6 +6,7 @@ Metadata_t firmwareMetadata;
 FirmwareBuffer_t firmwareBuffer;
 UpdateStatus_t updateStatus;
 BootloaderState_t bootloaderState = BOOTLOADER_WAIT_HANDSHAKE;
+uint32_t currentFirmwareVersion = 0;
 
 // Initialize system (SPI, GPIOs, and other peripherals)
 void System_Init() {
@@ -14,6 +15,8 @@ void System_Init() {
     Initialize_Flash();
     Initialize_Watchdog();
     firmwareBuffer.size = 0;
+
+    currentFirmwareVersion = Read_Firmware_Version();
 }
 
 // Handle incoming SPI communication in bootloader mode
@@ -134,7 +137,7 @@ bool Extract_Metadata(FirmwareBuffer_t *buffer, Metadata_t *metadata) {
 // Validate metadata
 bool Validate_Metadata(Metadata_t *metadata) {
     // Check firmware version, size, and checksum
-    return (metadata->firmware_version > CURRENT_VERSION &&
+    return (metadata->firmware_version > currentFirmwareVersion &&
             metadata->firmware_size == firmwareBuffer.size &&
             Validate_Checksum(firmwareBuffer.data, firmwareBuffer.size, metadata->checksum));
 }
@@ -171,6 +174,11 @@ void Run_Existing_Application() {
 void Reset_MCU() {
     // Reset MCU to start the new firmware
     Perform_System_Reset();
+}
+
+uint32_t Read_Firmware_Version(void) {
+    // Read the version from a predefined memory address
+    return *((uint32_t*)VERSION_ADDRESS);
 }
 
 

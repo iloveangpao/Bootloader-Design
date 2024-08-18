@@ -7,6 +7,7 @@
 
 #define PACKET_SIZE 256
 #define MAX_FIRMWARE_SIZE 2^16
+#define VERSION_ADDRESS 0xFFFFFFFF
 
 // Define the packet structure
 typedef struct {

@@ -1,5 +1,5 @@
 #include "a_bootloader.h"
-#include "crc16.h"  // Assume CRC library
+// #include "crc16.h"  // Assume CRC library
 
 // Global variables
 FirmwareImage_t firmwareImage;
@@ -53,7 +53,7 @@ void Bootloader_Task(void) {
 void Self_Firmware_Update_Task(void) {
     // Reset the update status for self-update
     txControl.update_status = UPDATE_IN_PROGRESS;
-    if (!Validate_Firmware(FirmwareImage_t *firmware)) txControl.update_status = UPDATE_ERROR;
+    if (!Validate_Firmware(&firmwareImage)) txControl.update_status = UPDATE_ERROR;
 
     if (txControl.update_status != UPDATE_ERROR) {
         // Write the new firmware to the appropriate flash area
@@ -96,7 +96,7 @@ void Firmware_Reception_Task(void) {
                     Add_Packet_To_Firmware(&firmwareImage, &packet);
                     Modbus_Acknowledge_Packet();
 
-                    if (All_Packets_Received()) {
+                    if (All_Packets_Received(&firmwareImage)) {
                         modbusState = MODBUS_COMPLETE;
                     } else {
                         modbusState = MODBUS_RECEIVING_PACKET;
@@ -417,7 +417,7 @@ void Write_Firmware_To_Flash(FirmwareImage_t *firmware) {
         return false;
     }
     // Write buffer data to flash memory
-    return Write_Flash(buffer->data, buffer->size);
+    return Write_Flash(firmware->data, firmware->size);
 }
 
 void Set_Boot_From_New_Firmware(void) {
