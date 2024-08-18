@@ -412,8 +412,12 @@ bool Validate_Firmware(FirmwareImage_t *firmware) {
 }
 
 void Write_Firmware_To_Flash(FirmwareImage_t *firmware) {
-    // Write the validated firmware to the appropriate flash memory area
-    // Platform-specific implementation
+    // Erase necessary flash sectors
+    if (!Erase_Flash()) {
+        return false;
+    }
+    // Write buffer data to flash memory
+    return Write_Flash(buffer->data, buffer->size);
 }
 
 void Set_Boot_From_New_Firmware(void) {
